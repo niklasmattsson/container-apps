@@ -28,3 +28,15 @@ jobs:
       - run: |
           ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Build and deploy Container App
+        uses: azure/container-apps-deploy-action@v0
+        with:
+          acrName: ${{ env.REGISTRY_NAME }}
+          containerAppName: demo-api
+          resourceGroup: container-apps-test
+          imageToDeploy: ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
